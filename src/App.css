@@ -1,0 +1,13 @@
+.inputHolder{
+    resize: none;
+    font-size: 18px;
+    font-weight: bold;
+    color: black;
+}
+
+.descriptionHolder{
+    resize: none;
+    font-size: 18px;
+    font-weight: 300;
+    color: black;
+}
