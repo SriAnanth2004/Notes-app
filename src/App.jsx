@@ -7,32 +7,40 @@ import EditIcon from "@mui/icons-material/Edit";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
-import Paper from "@mui/material/Paper";
-import { TextField } from "@mui/material";
 
 const App = () => {
   const [notes, setNotes] = useState([]);
   const [isPopupOpen, setisPopupOpen] = useState(false);
   const [currentNote, setCurrentNote] = useState(null);
   const [isMainOpen, setisMainOpen] = useState(true);
+  const [editingIndex, setEditingIndex] = useState(null);
 
   const addNotes = (note) => {
     setNotes([...notes, note]);
   };
+
   const updateNote = (updatedNote, index) => {
     const newNotes = notes.map((note, i) => (i === index ? updatedNote : note));
     setNotes(newNotes);
+    setEditingIndex(null);
   };
 
   const deleteNote = (index) => {
-    const newNotes = notes.filter((_, i) => i !== index);
-    setNotes(newNotes);
+    if (window.confirm("Are you sure you want to delete this note?")) {
+      const newNotes = notes.filter((_, i) => i !== index);
+      setNotes(newNotes);
+      if (editingIndex === index) {
+        setEditingIndex(null);
+      }
+    }
   };
 
   const handleEdit = (index) => {
-    setCurrentNote({ ...notes[index], index });
-    setisPopupOpen(true);
-    setisMainOpen(false);
+    setEditingIndex(index);
+  };
+
+  const handleExit = () => {
+    setEditingIndex(null);
   };
 
   return (
@@ -81,7 +89,14 @@ const App = () => {
                     <textarea
                       className="inputHolder"
                       value={note.input}
-                      disabled
+                      onChange={(e) => {
+                        if (index === editingIndex) {
+                          const newNotes = [...notes];
+                          newNotes[index].input = e.target.value;
+                          setNotes(newNotes);
+                        }
+                      }}
+                      disabled={editingIndex !== index}
                       rows="1"
                       cols="30"
                     ></textarea>
@@ -99,36 +114,69 @@ const App = () => {
                     <textarea
                       className="descriptionHolder"
                       value={note.description}
-                      disabled
+                      onChange={(e) => {
+                        if (index === editingIndex) {
+                          const newNotes = [...notes];
+                          newNotes[index].description = e.target.value;
+                          setNotes(newNotes);
+                        }
+                      }}
+                      disabled={editingIndex !== index}
                       rows="8"
                       cols="30"
                     ></textarea>
                   </Grid>
 
-                  <Grid
-                    container
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    padding={2}
-                  >
-                    <Button
-                      variant="outlined"
-                      aria-label="edit"
-                      onClick={() => handleEdit(index)}
+                  {editingIndex !== index ? (
+                    <Grid
+                      container
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      padding={2}
                     >
-                      <EditIcon />
-                    </Button>
+                      <Button
+                        variant="outlined"
+                        aria-label="edit"
+                        onClick={() => handleEdit(index)}
+                      >
+                        <EditIcon />
+                      </Button>
 
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      size="inherit"
-                      onClick={() => deleteNote(index)}
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        size="inherit"
+                        onClick={() => deleteNote(index)}
+                      >
+                        {<DeleteIcon />}
+                      </Button>
+                    </Grid>
+                  ) : (
+                    <Grid
+                      container
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      padding={2}
                     >
-                      {<DeleteIcon />}
-                    </Button>
-                  </Grid>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => updateNote(notes[index], index)}
+                      >
+                        Save
+                      </Button>
+
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={handleExit}
+                      >
+                        Exit
+                      </Button>
+                    </Grid>
+                  )}
                 </Grid>
               ))}
             </Grid>
@@ -138,7 +186,8 @@ const App = () => {
         {isPopupOpen && (
           <Notes
             onClose={() => {
-              setisPopupOpen(false), setisMainOpen(true);
+              setisPopupOpen(false);
+              setisMainOpen(true);
             }}
             onSave={(note) => {
               if (currentNote) {
