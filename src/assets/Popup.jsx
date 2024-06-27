@@ -22,7 +22,7 @@ const Notes = ({ onClose, onSave, note }) => {
   return (
     <Grid container direction={"column"} maxWidth="sm" className="newPopup">
       <Typography marginTop={4} marginBottom={4} variant="h4">
-        {note ? "Edit Note" : "New Note"}
+        {"New Note"}
       </Typography>
       <Grid container marginBottom={3}>
         <TextField
